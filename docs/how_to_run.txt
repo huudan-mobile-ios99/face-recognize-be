@@ -1,0 +1,21 @@
+1.try to open this to cmd:
+container1:  docker run --name ome -d -e OME_HOST_IP=192.168.101.169 -p 1935:1935 -p 9999:9999/udp -p 9000:9000 -p 3333:3333 -p 3478:3478 -p 10000-10009:10000-10009/udp -v ome-origin-conf:/opt/ovenmediaengine/bin/origin_conf -v ome-edge-conf:/opt/ovenmediaengine/bin/edge_conf airensoft/ovenmediaengine:latest
+container2: docker run --name ome2 -d -e OME_HOST_IP=192.168.101.169 -p 1936:1935 -p 10000:9999/udp -p 9001:9000 -p 3334:3333 -p 3479:3478 -p 10010-10019:10000-10009/udp -v ome2-origin-conf:/opt/ovenmediaengine/bin/origin_conf -v ome2-edge-conf:/opt/ovenmediaengine/bin/edge_conf airensoft/ovenmediaengine:latest
+
+container 2 secondway: docker run --name ome2 -d -e OME_HOST_IP=192.168.101.169 -e OME_RTMP_PROV_PORT=1940 -e OME_SRT_PROV_PORT=10050 -e OME_WEBRTC_SIGNALLING_PORT=3340 -e OME_WEBRTC_CANDIDATE_PORT=10100-10104/udp -e OME_WEBRTC_TCP_RELAY_PORT=3480 -e OME_ORIGIN_PORT=9010 -p 1940:1940 -p 10050:10050/udp -p 3340:3340 -p 3480:3480 -p 9010:9010 -p 10100-10104:10100-10104/udp -v ome2-origin-conf:/opt/ovenmediaengine/bin/origin_conf -v ome2-edge-conf:/opt/ovenmediaengine/bin/edge_conf airensoft/ovenmediaengine:latest
+docker rm -f ome2
+docker run --name ome2 -d -e OME_HOST_IP=192.168.101.169 -p 1936:1935 -p 10001:9999/udp -p 9001:9000 -p 3334:3333 -p 3479:3478 -p 10100-10109:10000-10009/udp -v ome2-origin-conf:/opt/ovenmediaengine/bin/origin_conf -v ome2-edge-conf:/opt/ovenmediaengine/bin/edge_conf airensoft/ovenmediaengine:latest
+
+2. open OBS capture full screen or from media (DISPLAY CAPTURE)
+in stream setting
+URL RTMP: rtmp://192.168.101.169:1935/app
+
+KEY: stream
+
+
+3. test
+in ovenMEdiaPlayer
+http://192.168.101.169:8090/
+
+add source: ws://192.168.101.169:3333/app/stream
+and test

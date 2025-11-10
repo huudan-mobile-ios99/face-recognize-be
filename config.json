@@ -1,0 +1,7 @@
+{
+  "webrtcUrl": "ws://192.168.101.169:3333/app/stream",
+  "webrtcUrl2": "ws://192.168.101.169:3334/app/stream",
+  "webrtcUrl3": "ws://192.168.101.169:3335/app/stream",
+  "webrtcUrl4": "ws://192.168.101.169:3336/app/stream",
+  "webrtcUrl5": "ws://192.168.101.169:3337/app/stream"
+}

@@ -1,0 +1,14 @@
+curl -X POST http://localhost:8081/api/machine/machine_online_status \
+  -H "Content-Type: application/json" \
+  -d '{"date": "2025-10-20"}'
+
+
+
+
+curl -X POST http://localhost:8081/api/machine/machine_online_status_slot \
+  -H "Content-Type: application/json" \
+  -d '{"date": "2025-10-20"}'
+
+
+http://localhost:8081/api/customer/
+http://localhost:8081/api/view/1

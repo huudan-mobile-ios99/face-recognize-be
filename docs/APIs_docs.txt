@@ -1,0 +1,189 @@
+ADMIN PAGE UI : http://192.168.101.169:8081/v1
+
+
+
+thomas.dan@Thomas-MacBook-Pro ~ %
+
+
+curl -u admin:password123 http://192.168.101.169:8081/v1/vhosts/default/apps/app/streams
+
+{"message":"OK","response":["stream"],"statusCode":200}%
+thomas.dan@Thomas-MacBook-Pro ~ %
+curl -u admin:password123 http://192.168.101.169:8081/v1/vhosts
+
+{"message":"OK","response":["default"],"statusCode":200}%
+
+thomas.dan@Thomas-MacBook-Pro ~ %
+thomas.dan@Thomas-MacBook-Pro ~ %
+curl -u admin:password123 http://192.168.101.169:8081/v1/vhosts/default/apps/app/streams/stream
+
+{
+  "message": "OK",
+  "response": {
+    "input": {
+      "createdTime": "2025-10-09T06:12:06.854+00:00",
+      "sourceType": "Rtmp",
+      "sourceUrl": "TCP://172.17.0.1:50692",
+      "tracks": [
+        {
+          "id": 0,
+          "name": "Video",
+          "type": "Video",
+          "video": {
+            "bitrate": 7500000,
+            "bitrateAvg": 4651632,
+            "bitrateConf": 7500000,
+            "bitrateLatest": 4538570,
+            "bypass": false,
+            "codec": "H264",
+            "deltaFramesSinceLastKeyFrame": 1,
+            "framerate": 30.0,
+            "framerateAvg": 30.0,
+            "framerateConf": 30.0,
+            "framerateLatest": 29.940120697021484,
+            "hasBframes": false,
+            "height": 1080,
+            "keyFrameInterval": 29.95158576965332,
+            "keyFrameIntervalAvg": 29.95158576965332,
+            "keyFrameIntervalConf": 0.0,
+            "keyFrameIntervalLatest": 30.0,
+            "width": 1920
+          }
+        },
+        {
+          "audio": {
+            "bitrate": 160000,
+            "bitrateAvg": 4878,
+            "bitrateConf": 160000,
+            "bitrateLatest": 4957,
+            "bypass": false,
+            "channel": 2,
+            "codec": "AAC",
+            "samplerate": 48000
+          },
+          "id": 1,
+          "name": "Audio",
+          "type": "Audio"
+        },
+        {
+          "id": 2,
+          "name": "Data",
+          "type": "Data"
+        }
+      ]
+    },
+    "name": "stream",
+    "outputs": [
+      {
+        "name": "stream",
+        "playlists": [
+          {
+            "fileName": "llhls",
+            "name": "llhls_default",
+            "options": {
+              "enableTsPackaging": false,
+              "hlsChunklistPathDepth": -1,
+              "webrtcAutoAbr": false
+            },
+            "renditions": [
+              {
+                "audioVariantName": "aac_audio",
+                "name": "default",
+                "videoVariantName": "bypass_video"
+              }
+            ]
+          },
+          {
+            "fileName": "master",
+            "name": "default",
+            "options": {
+              "enableTsPackaging": true,
+              "hlsChunklistPathDepth": 0,
+              "webrtcAutoAbr": true
+            },
+            "renditions": [
+              {
+                "audioVariantName": "aac_audio",
+                "name": "1080p",
+                "videoVariantName": "bypass_video"
+              },
+              {
+                "audioVariantName": "opus_audio",
+                "name": "1080p_1",
+                "videoVariantName": "bypass_video"
+              }
+            ]
+          },
+          {
+            "fileName": "webrtc_default",
+            "name": "webrtc_default",
+            "options": {
+              "enableTsPackaging": false,
+              "hlsChunklistPathDepth": -1,
+              "webrtcAutoAbr": false
+            },
+            "renditions": [
+              {
+                "audioVariantName": "opus_audio",
+                "name": "default",
+                "videoVariantName": "bypass_video"
+              }
+            ]
+          }
+        ],
+        "tracks": [
+          {
+            "id": 0,
+            "name": "bypass_video",
+            "type": "Video",
+            "video": {
+              "bypass": true
+            }
+          },
+          {
+            "audio": {
+              "bypass": true
+            },
+            "id": 1,
+            "name": "aac_audio",
+            "type": "Audio"
+          },
+          {
+            "audio": {
+              "bitrate": 128000,
+              "bitrateAvg": 128000,
+              "bitrateConf": 128000,
+              "bitrateLatest": 125613,
+              "bypass": false,
+              "channel": 2,
+              "codec": "OPUS",
+              "samplerate": 48000
+            },
+            "id": 2,
+            "name": "opus_audio",
+            "type": "Audio"
+          },
+          {
+            "id": 3,
+            "name": "Data",
+            "type": "Data"
+          }
+        ]
+      }
+    ]
+  },
+  "statusCode": 200
+}%
+
+
+
+thomas.dan@Thomas-MacBook-Pro ~ % curl -u admin:password123 http://192.168.101.169:8081/v1/stats
+
+{"message":"[HTTP] Controller not found (404)","statusCode":404}%               thomas.dan@Thomas-MacBook-Pro ~ %
+thomas.dan@Thomas-MacBook-Pro ~ % curl -u admin:password123 http://192.168.101.169:8081/v1/vhosts
+
+{"message":"OK","response":["default"],"statusCode":200}%                       thomas.dan@Thomas-MacBook-Pro ~ % curl -u admin:password123 http://192.168.101.169:8081/v1/vhosts/default/apps
+
+{"message":"OK","response":["app"],"statusCode":200}%                           thomas.dan@Thomas-MacBook-Pro ~ % curl -u admin:password123 http://192.168.101.169:8081/v1/vhosts/default/apps/app/streams
+
+{"message":"OK","response":["stream"],"statusCode":200}%                        thomas.dan@Thomas-MacBook-Pro ~ %

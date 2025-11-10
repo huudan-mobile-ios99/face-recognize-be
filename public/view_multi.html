@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OvenMediaEngine Live Stream</title>
+  <script src="https://cdn.jsdelivr.net/npm/ovenplayer/dist/ovenplayer.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      width: 100%;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+    #container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0px;
+      justify-content: center;
+      padding: 0px;
+    }
+    .player-box {
+      width: 50%;
+      background: #111;
+      border-radius: 0px;
+      overflow: hidden;
+      position: relative;
+    }
+    .player-title {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      color: #fff;
+      font-size: 12px;
+      background: rgba(0,0,0,0.6);
+      padding: 0px 0px;
+      border-radius: 0px;
+    }
+    .player {
+      width: 100%;
+      height: 360px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">Loading streams...</div>
+
+  <script>
+    async function loadStreams() {
+      const params = new URLSearchParams(window.location.search);
+      const customerNumber = params.get("customerNumber");
+
+      if (!customerNumber) {
+        document.getElementById("container").innerHTML = "❌ Missing customerNumber in URL. Use ?customerNumber=1";
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8081/api/customer/${customerNumber}/streams`);
+        const data = await res.json();
+
+        if (!data.data || data.data.length === 0) {
+          document.getElementById("container").innerHTML = "⚠️ No streams found for this customer.";
+          return;
+        }
+
+        const container = document.getElementById("container");
+        container.innerHTML = "";
+
+        data.data.forEach((stream, index) => {
+          const box = document.createElement("div");
+          box.className = "player-box";
+
+          const title = document.createElement("div");
+          title.className = "player-title";
+          title.textContent = `${stream.streamName} (${stream.streamMachine})`;
+
+          const playerDiv = document.createElement("div");
+          playerDiv.id = `player-${index}`;
+          playerDiv.className = "player";
+
+          box.appendChild(title);
+          box.appendChild(playerDiv);
+          container.appendChild(box);
+
+          // Create OvenPlayer for each stream
+          OvenPlayer.create(playerDiv.id, {
+            sources: [
+              {
+                type: "webrtc",
+                file: stream.streamUrl
+              }
+            ],
+            autoStart: true,
+            controls: true,
+            mute: false
+          });
+        });
+
+      } catch (err) {
+        console.error("Error loading streams:", err);
+        document.getElementById("container").innerHTML = "❌ Failed to load streams.";
+      }
+    }
+
+    loadStreams();
+  </script>
+</body>
+</html>

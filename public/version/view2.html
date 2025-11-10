@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> WebRTC Live Stream 2 </title>
+  <script src="https://cdn.jsdelivr.net/npm/ovenplayer/dist/ovenplayer.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="player"></div>
+
+  <script>
+    // OME2 WebRTC stream URL
+    const webrtcUrl = "ws://192.168.101.169:3340/app/stream";
+
+    // Initialize OvenPlayer
+    OvenPlayer.create("player", {
+      sources: [
+        {
+          type: "webrtc",
+          file: webrtcUrl
+        }
+      ],
+      autoStart: true,
+      controls: true
+    });
+  </script>
+</body>
+</html>

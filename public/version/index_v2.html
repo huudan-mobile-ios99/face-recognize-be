@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebRTC Live Stream 1</title>
+  <script src="https://cdn.jsdelivr.net/npm/ovenplayer/dist/ovenplayer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.8.0/dist/socket.io.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+    #hiddenMessage {
+      display: none;
+      color: white;
+      font-size: 2rem;
+      text-align: center;
+      padding-top: 20%;
+    }
+  </style>
+</head>
+<body>
+  <div id="player"></div>
+  <div id="hiddenMessage">🔒 Stream is hidden by admin</div>
+
+  <script>
+  let playerInstance = null;
+
+  // Helper: get ?code=... from URL
+  function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
+
+  async function initPlayer() {
+    const code = getQueryParam("code");
+    if (!code) {
+      document.getElementById("hiddenMessage").innerText = "❌ Missing code in URL";
+      document.getElementById("hiddenMessage").style.display = "block";
+      return;
+    }
+
+    const res = await fetch(`/api/stream/init?code=${code}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      document.getElementById("hiddenMessage").innerText = "❌ " + (data.message || "Invalid code");
+      document.getElementById("hiddenMessage").style.display = "block";
+      return;
+    }
+
+    // If success, init OvenPlayer with streamUrl
+    updateVisibility(true, data.streamUrl);
+  }
+
+  function updateVisibility(visible, webrtcUrl) {
+    const playerDiv = document.getElementById("player");
+    const hiddenMessage = document.getElementById("hiddenMessage");
+
+    if (!visible) {
+      if (playerInstance) {
+        playerInstance.remove();
+        playerInstance = null;
+      }
+      playerDiv.style.display = "none";
+      hiddenMessage.style.display = "block";
+    } else {
+      hiddenMessage.style.display = "none";
+      playerDiv.style.display = "block";
+      if (!playerInstance) {
+        playerInstance = OvenPlayer.create("player", {
+          sources: [{ type: "webrtc", file: webrtcUrl }],
+          autoStart: true,
+          controls: true
+        });
+      }
+    }
+  }
+
+  // Init on load
+  initPlayer();
+</script>
+
+<!-- <script>
+  let playerInstance = null;
+  const socket = io(); // connect to your backend
+
+  // Helper: get ?code=... from URL
+  function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
+
+  async function initPlayer() {
+    const code = getQueryParam("code");
+    if (!code) {
+      document.getElementById("hiddenMessage").innerText = "❌ Missing code in URL";
+      document.getElementById("hiddenMessage").style.display = "block";
+      return;
+    }
+
+    const res = await fetch(`/api/stream/init?code=${code}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      document.getElementById("hiddenMessage").innerText = "❌ " + (data.message || "Invalid code");
+      document.getElementById("hiddenMessage").style.display = "block";
+      return;
+    }
+
+    // If success, init OvenPlayer with streamUrl
+    updateVisibility(true, data.streamUrl, code);
+  }
+
+  function updateVisibility(visible, webrtcUrl, code) {
+    const playerDiv = document.getElementById("player");
+    const hiddenMessage = document.getElementById("hiddenMessage");
+
+    if (!visible) {
+      if (playerInstance) {
+        playerInstance.remove();
+        playerInstance = null;
+      }
+      playerDiv.style.display = "none";
+      hiddenMessage.style.display = "block";
+    } else {
+      hiddenMessage.style.display = "none";
+      playerDiv.style.display = "block";
+      if (!playerInstance) {
+        playerInstance = OvenPlayer.create("player", {
+          sources: [{ type: "webrtc", file: webrtcUrl }],
+          autoStart: true,
+          controls: true
+        });
+
+        // ✅ When the stream starts playing
+        playerInstance.on("play", () => {
+          socket.emit("streamStatus", { code, status: "playing" });
+        });
+
+        // ✅ When the stream stops, pauses, or ends
+        playerInstance.on("pause", () => {
+          socket.emit("streamStatus", { code, status: "stopped" });
+        });
+        playerInstance.on("ended", () => {
+          socket.emit("streamStatus", { code, status: "stopped" });
+        });
+
+        // ✅ When user closes the tab or browser
+        window.addEventListener("beforeunload", () => {
+          socket.emit("streamStatus", { code, status: "stopped" });
+        });
+      }
+    }
+  }
+
+  // Init on load
+  initPlayer();
+</script> -->
+</body>
+</html>

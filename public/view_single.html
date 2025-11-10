@@ -1,0 +1,238 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Single Stream Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/ovenplayer/dist/ovenplayer.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      width: 100%;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #player-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #000;
+      border: 1px solid #222;
+      border-radius: 0px;
+      overflow: hidden;
+    }
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="player-container">
+    <div id="player"></div>
+    <div id="overlay" style="display: none;">Stream Ended</div>
+  </div>
+
+  <script>
+    async function loadStream() {
+      const params = new URLSearchParams(window.location.search);
+      const customerNumber = params.get("customerNumber");
+      const streamId = params.get("streamId");
+
+      const overlay = document.getElementById("overlay");
+      const playerDiv = document.getElementById("player");
+
+      if (!customerNumber || !streamId) {
+        overlay.textContent = "Missing parameters in URL.";
+        overlay.style.display = "flex";
+        return;
+      }
+
+      try {
+        const res = await fetch(`http://localhost:8081/api/customer/${customerNumber}/streams`);
+        const data = await res.json();
+
+        if (!data.data || data.data.length === 0) {
+          overlay.textContent = "No streams found for this customer.";
+          overlay.style.display = "flex";
+          return;
+        }
+
+        const stream = data.data.find(s => s.streamId === streamId);
+
+        console.log("Stream found:", stream);
+
+        if (!stream || !stream.streamUrl) {
+          overlay.style.display = "flex";
+          return;
+        }
+
+        // Hide overlay and play stream
+        overlay.style.display = "none";
+
+        const player = OvenPlayer.create("player", {
+          sources: [
+            {
+              type: "webrtc",
+              file: stream.streamUrl
+            }
+          ],
+          autoStart: true,
+          controls: true,
+          mute: false
+        });
+
+        player.on("error", (err) => {
+          console.error("OvenPlayer Error:", err);
+          overlay.textContent = "⚠️ Stream Error";
+          overlay.style.display = "flex";
+        });
+
+      } catch (err) {
+        console.error("Error loading stream:", err);
+        overlay.textContent = "Failed to load stream.";
+        overlay.style.display = "flex";
+      }
+    }
+
+    loadStream();
+  </script>
+</body>
+</html> -->
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Single Stream Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/ovenplayer/dist/ovenplayer.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      height: 100%;
+      width: 100%;
+      color: white;
+      font-family: "Open Sans", Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #player-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background: #000;
+      overflow: hidden;
+    }
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="player-container">
+    <div id="player"></div>
+    <div id="overlay" style="display: none;">Stream not available</div>
+  </div>
+
+  <script>
+    async function loadStream() {
+      const params = new URLSearchParams(window.location.search);
+      const customerNumber = params.get("customerNumber");
+      const streamId = params.get("streamId");
+
+      const overlay = document.getElementById("overlay");
+
+      if (!customerNumber || !streamId) {
+        overlay.textContent = "Missing parameters in URL.";
+        overlay.style.display = "flex";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/v1/customer/${customerNumber}/streams`);
+        const data = await res.json();
+
+        if (!data.data || data.data.length === 0) {
+          overlay.textContent = "No streams found for this customer.";
+          overlay.style.display = "flex";
+          return;
+        }
+
+        const stream = data.data.find(s => s.streamId === streamId);
+        console.log("Stream found:", stream);
+
+        // If stream not found or inactive → show overlay with message
+        if (!stream || stream.status === false || !stream.streamUrl) {
+          overlay.textContent = "Stream not available";
+          overlay.style.display = "flex";
+          return;
+        }
+
+        // ✅ Active stream → hide overlay and load player
+        overlay.style.display = "none";
+
+        const player = OvenPlayer.create("player", {
+          sources: [
+            {
+              type: "webrtc",
+              file: stream.streamUrl
+            }
+          ],
+          autoStart: true,
+          controls: true,
+          mute: false
+        });
+
+        player.on("error", (err) => {
+          console.error("OvenPlayer Error:", err);
+          overlay.textContent = "Stream Error";
+          overlay.style.display = "flex";
+        });
+
+      } catch (err) {
+        console.error("Error loading stream:", err);
+        overlay.textContent = "Failed to load stream.";
+        overlay.style.display = "flex";
+      }
+    }
+
+    loadStream();
+  </script>
+</body>
+</html>

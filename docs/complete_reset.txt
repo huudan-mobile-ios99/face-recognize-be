@@ -1,0 +1,131 @@
+Perfect 👍 let’s do this cleanly from scratch — here’s a complete reset and rebuild plan for your OvenMediaEngine (OME) setup.
+
+We’ll:
+✅ completely remove the old container & volumes,
+✅ check which ports are still in use,
+✅ start a fresh clean ome2 container,
+✅ and confirm it runs properly.
+
+🧹 Step 1. Stop & remove existing OME containers
+
+Run these commands in PowerShell or CMD:
+
+docker stop ome ome2
+docker rm ome ome2
+
+
+Then remove old config volumes if you created them:
+
+docker volume rm ome-origin-conf ome-edge-conf ome2-origin-conf ome2-edge-conf
+
+
+(If Docker says “volume is in use”, that’s fine — we’ll check ports next.)
+
+🔍 Step 2. Check for conflicting ports
+
+OME uses these ports (based on your setup):
+
+Port	Purpose	Type
+1935	RTMP ingest	TCP
+9999	SRT ingest	UDP
+9000	OVT / API	TCP
+3333 / 3334	WebRTC signaling	TCP
+3478	TCP relay	TCP
+10000–10004	WebRTC ICE candidates	UDP
+
+Check which processes are using them:
+
+🪟 On Windows
+netstat -ano | findstr "1935 9999 9000 3333 3334 3478 10000"
+
+
+Then kill any process that blocks these ports:
+
+taskkill /PID <PID> /F
+
+
+(Replace <PID> with the process ID shown in netstat.)
+
+🧱 Step 3. Start a clean OME container
+
+Now create a brand new clean container:
+
+docker run --name ome2 -d ^
+  -e OME_HOST_IP=192.168.101.169 ^
+  -p 1935:1935 ^
+  -p 9999:9999/udp ^
+  -p 9000:9000 ^
+  -p 3333:3333 ^
+  -p 3334:3334 ^
+  -p 3478:3478 ^
+  -p 10000-10009:10000-10009/udp ^
+  airensoft/ovenmediaengine:latest
+
+
+(If you’re on PowerShell, use backtick ` instead of ^ for multi-line.)
+
+This starts OME with default Server.xml — no conflicts.
+
+🧩 Step 4. Verify container status
+
+Check logs:
+
+docker logs -f ome2
+
+
+You should see:
+
+API Server is disabled by configuration
+WebRTCProvider is listening on *:3333 (TLS: *:3334)
+RTMPProvider is listening on *:1935
+
+
+That means it’s running perfectly.
+
+🔎 Step 5. Optional – view default Server.xml
+
+To inspect the config inside the container:
+
+docker exec -it ome2 cat /opt/ovenmediaengine/bin/origin_conf/Server.xml
+
+
+If you want to copy it out to edit:
+
+docker cp ome2:/opt/ovenmediaengine/bin/origin_conf/Server.xml .\
+notepad .\Server.xml
+
+
+Then copy it back:
+
+docker cp .\Server.xml ome2:/opt/ovenmediaengine/bin/origin_conf/Server.xml
+
+
+Restart container if you edited config:
+
+docker restart ome2
+
+🧠 Step 6. Test OBS & Player
+
+OBS settings:
+
+rtmp://192.168.101.169:1935/app
+key: stream
+
+
+Player URL:
+
+ws://192.168.101.169:3333/app/stream
+
+
+Check API (optional):
+
+http://192.168.101.169:9000/v1/vhosts/default/apps/app/streams
+
+
+Would you like me to include one command that both checks and kills any process using conflicting ports automatically?
+
+
+
+-DELETE VOLUMES & Image in DOCKER (((IMPORTANT)))
+-DELETE VOLUMES & Image in DOCKER (((IMPORTANT)))
+

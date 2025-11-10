@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebRTC Live Stream</title>
+  <script src="https://cdn.jsdelivr.net/npm/ovenplayer/dist/ovenplayer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.8.0/dist/socket.io.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+    #player {
+      width: 100%;
+      height: 100%;
+    }
+    #hiddenMessage {
+      display: none;
+      color: white;
+      font-size: 2rem;
+      text-align: center;
+      padding-top: 20%;
+    }
+  </style>
+</head>
+<body>
+  <div id="player"></div>
+  <div id="hiddenMessage">🔒 Stream is hidden by admin</div>
+
+  <script>
+    let playerInstance = null;
+
+    async function initPlayer() {
+      const res = await fetch("/api/config");
+      const config = await res.json();
+      updateVisibility(config.visible, config.webrtcUrl);
+    }
+
+    function updateVisibility(visible, webrtcUrl) {
+      const playerDiv = document.getElementById("player");
+      const hiddenMessage = document.getElementById("hiddenMessage");
+
+      if (!visible) {
+        if (playerInstance) {
+          playerInstance.remove(); // Remove player if it exists
+          playerInstance = null;
+        }
+        playerDiv.style.display = "none";
+        hiddenMessage.style.display = "block";
+      } else {
+        hiddenMessage.style.display = "none";
+        playerDiv.style.display = "block";
+        if (!playerInstance) {
+          playerInstance = OvenPlayer.create("player", {
+            sources: [{
+              type: "webrtc",
+              file: webrtcUrl
+            }],
+            autoStart: true,
+            controls: true
+          });
+        }
+      }
+    }
+
+    // Initialize Socket.IO client
+    const socket = io();
+
+    // Listen for visibility updates from the server
+    socket.on("visibilityUpdate", (visible) => {
+      fetch("/api/config").then(res => res.json()).then(config => {
+        updateVisibility(visible, config.webrtcUrl);
+      });
+    });
+    socket.on("refreshPage", () => {
+    console.log("Received refresh signal, reloading page...");
+    location.reload();
+    });
+
+    // Initialize the player on page load
+    initPlayer();
+  </script>
+</body>
+</html>

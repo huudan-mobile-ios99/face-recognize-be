@@ -1,0 +1,121 @@
+DOCS TO run docker and OBS To start stream in PC View
+
+ docker ps  | check list container running
+ docker rm ome (remove container ome )
+ docker restart ome
+ docker stop ome
+ docker run -d --name ome -p 1935:1935 -p 3333:3333 -p 8080:8080 -p 9000:9000 -p 10000-10050:10000-10050/udp airensoft/ovenmediaengine:latest         (run 2 container ome for live stream)
+
+
+
+docker run --name ome -d -e OME_HOST_IP=192.168.101.169 -p 1935:1935 -p 9999:9999/udp -p 9000:9000 -p 3333:3333 -p 3478:3478 -p 10000-10009:10000-10009/udp -v ome-origin-conf:/opt/ovenmediaengine/bin/origin_conf -v ome-edge-conf:/opt/ovenmediaengine/bin/edge_conf airensoft/ovenmediaengine:latest
+
+
+
+MEDIA PLAYER OVEN
+http://192.168.101.169:8090/     (view)
+
+START VIEW by Nodejs
+
+cd to edit server.xml config of ome
+
+cd /opt/ovenmediaengine/bin/origin_conf
+ls
+
+
+
+Copy the file out:
+
+docker cp ome:/opt/ovenmediaengine/bin/origin_conf/Server.xml .\
+
+
+Open in Notepad (this works because now it’s on Windows, not inside Docker):
+
+notepad .\Server.xml
+
+uncomment <Managers>
+  <API>
+    <Port>${env:OME_API_PORT:8081}</Port>
+    <WorkerCount>1</WorkerCount>
+  </API>
+</Managers>
+to active api in server.xml
+
+
+Make your changes → Save.
+
+Copy back into the container:
+
+docker cp .\Server.xml ome:/opt/ovenmediaengine/bin/origin_conf/Server.xml
+
+
+
+
+
+open ome2 (if ome2 is the name)
+docker exec -it ome2 bash
+cd /opt/ovenmediaengine/bin/origin_conf
+ls
+
+docker cp ome2:/opt/ovenmediaengine/bin/origin_conf/Server.xml .\
+notepad .\Server.xml
+docker cp .\Server.xml ome2:/opt/ovenmediaengine/bin/origin_conf/Server.xml
+
+
+
+Restart the container:
+
+docker restart ome
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+OME 2 container edit Server.xml
+docker cp ome2:/opt/ovenmediaengine/bin/origin_conf/Server.xml .\
+notepad .\Server.xml
+docker cp .\Server.xml ome2:/opt/ovenmediaengine/bin/origin_conf/Server.xml
+
+
+
+
+
+🧩 Flow Summary
+Component	Protocol	Port	Example
+OBS → OME	RTMP ingest	1935	rtmp://192.168.101.169:1935/app
+OME → Browser	WebRTC playback	3333	ws://192.168.101.169:3333/app/stream
+OME API (optional)	HTTP API	9000	http://192.168.101.169:9000/v1/...
+
+
+🟢 To confirm the stream is live
+
+Open this in your browser:
+
+http://192.168.101.169:9000/v1/vhosts/default/apps/app/streams
+
+
+If your OBS is connected properly, you should see:
+
+{
+  "streamList": ["stream"]
+}
+
+
+
+
+
+
+
+
+
+
+
