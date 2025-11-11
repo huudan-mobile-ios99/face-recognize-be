@@ -6,11 +6,7 @@ const { Server } = require("socket.io");
 const path = require("path");
 
 const { connectDBLVMS } = require("./configurationDB/config_mongo");
-const customerRoutes = require("./routes/customerRoutes");
-const streamRoutes = require("./routes/streamRoutes");
-const viewRoutes = require("./routes/viewRoutes");
-const linkRoutes = require("./routes/linkRoutes");
-const machineRoutes = require("./routes/machineRoutes");
+const customerRoutes = require("./routes/customerRoute");
 
 const app = express();
 const server = http.createServer(app);
@@ -34,12 +30,8 @@ app.use(cors({ origin: "*" }));
 app.use(express.static(path.join(__dirname, "public")));
 
 // API Routes
-app.use("/api/v1/view", viewRoutes);
 app.use("/api/v1/customer", customerRoutes);       // ✅ User routes
-app.use("/api/v1/link", linkRoutes);               // ✅ Link routes
 
-//this is machine online status when inserted card
-app.use("/api/machine", machineRoutes);         // ✅ machine routes
 // Start server
 const PORT = process.env.PORT || 8081;
 server.listen(PORT, async () => {
@@ -47,6 +39,3 @@ server.listen(PORT, async () => {
   console.log(`🚀Face Recognize Server running on http://localhost:${PORT}`);
 });
 
-
-//run The CronJOB
-// require('./configurationDB/cronjob');
